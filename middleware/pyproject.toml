@@ -1,0 +1,41 @@
+[project]
+name = "middleware"
+version = "0.1.0"
+description = "Starfish's middleware implementation"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "etcd3",
+    "cryptography>=43.0.0",
+    "pydantic>=2.8.2",
+    "loguru>=0.7.2",
+    "ntplib>=0.4.0",
+    "pydantic-settings>=2.4.0",
+]
+
+[tool.black]
+line-length = 100
+include = "\\.pyi?$"
+
+[tool.isort]
+profile = "black"
+
+[tool.taskipy.tasks]
+lint = "black . && isort . && flake8 ."
+test = "python test.py"
+
+[tool.uv]
+dev-dependencies = [
+    "black>=24.8.0",
+    "flake8>=7.1.1",
+    "pre-commit>=3.8.0",
+    "taskipy>=1.13.0",
+    "isort>=5.13.2",
+]
+
+[tool.uv.sources]
+etcd3 = { git = "https://github.com/kragniz/python-etcd3" }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
