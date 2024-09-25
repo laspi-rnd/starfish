@@ -60,11 +60,11 @@ describe("LISTRACK_ETH Contract", function () {
 
     it("Should allow Mike to agree and lock his DREX", async function () {
       await contract.connect(alice).setTrade(
-        mike.address, 
-        alice.address, 
-        mike.address, 
-        ethers.parseEther("1.0"), 
-        ethers.parseEther("2.0"), 
+        mike.address,
+        alice.address,
+        mike.address,
+        ethers.parseEther("1.0"),
+        ethers.parseEther("2.0"),
         1
       );
       const tradeId = await contract.getTradeId(alice.address, mike.address, ethers.parseEther("1.0"), ethers.parseEther("2.0"), 1);
@@ -75,11 +75,11 @@ describe("LISTRACK_ETH Contract", function () {
 
     it("Should prevent Mike from agreeing with an incorrect DREX amount", async function () {
       await contract.connect(alice).setTrade(
-        mike.address, 
-        alice.address, 
-        mike.address, 
-        ethers.parseEther("1.0"), 
-        ethers.parseEther("2.0"), 
+        mike.address,
+        alice.address,
+        mike.address,
+        ethers.parseEther("1.0"),
+        ethers.parseEther("2.0"),
         1
       );
       const tradeId = await contract.getTradeId(alice.address, mike.address, ethers.parseEther("1.0"), ethers.parseEther("2.0"), 1);
@@ -92,11 +92,11 @@ describe("LISTRACK_ETH Contract", function () {
   describe("Submit Transaction Hash", function () {
     it("Should allow Alice to submit the ETH transaction hash", async function () {
       await contract.connect(alice).setTrade(
-        mike.address, 
-        alice.address, 
-        mike.address, 
-        ethers.parseEther("1.0"), 
-        ethers.parseEther("2.0"), 
+        mike.address,
+        alice.address,
+        mike.address,
+        ethers.parseEther("1.0"),
+        ethers.parseEther("2.0"),
         1
       );
       const tradeId = await contract.getTradeId(alice.address, mike.address, ethers.parseEther("1.0"), ethers.parseEther("2.0"), 1);
@@ -112,11 +112,11 @@ describe("LISTRACK_ETH Contract", function () {
 
     it("Should prevent Alice from submitting the same ETH transaction hash", async function () {
       await contract.connect(alice).setTrade(
-        mike.address, 
-        alice.address, 
-        mike.address, 
-        ethers.parseEther("1.0"), 
-        ethers.parseEther("2.0"), 
+        mike.address,
+        alice.address,
+        mike.address,
+        ethers.parseEther("1.0"),
+        ethers.parseEther("2.0"),
         1
       );
       const tradeId = await contract.getTradeId(alice.address, mike.address, ethers.parseEther("1.0"), ethers.parseEther("2.0"), 1);
@@ -134,11 +134,11 @@ describe("LISTRACK_ETH Contract", function () {
       await contract.addMiddlewareNode(middleware1.address);
 
       await contract.connect(alice).setTrade(
-        mike.address, 
-        alice.address, 
-        mike.address, 
-        ethers.parseEther("1.0"), 
-        ethers.parseEther("2.0"), 
+        mike.address,
+        alice.address,
+        mike.address,
+        ethers.parseEther("1.0"),
+        ethers.parseEther("2.0"),
         1
       );
       const tradeId = await contract.getTradeId(alice.address, mike.address, ethers.parseEther("1.0"), ethers.parseEther("2.0"), 1);
@@ -146,11 +146,11 @@ describe("LISTRACK_ETH Contract", function () {
       await contract.connect(mike).agreeTrade(tradeId, { value: ethers.parseEther("1.0") });
 
       await contract.connect(alice).submitTransactionHash(tradeId, "0xabcdef");
-      
+
       await expect(contract.connect(middleware1).settleTrade(tradeId, true))
         .to.emit(contract, "TradeSettled")
         .withArgs(tradeId, true);
-      
+
       const trade = await contract.getTradeStatus(tradeId);
       expect(trade.settled).to.be.true;
     });
@@ -159,11 +159,11 @@ describe("LISTRACK_ETH Contract", function () {
       await contract.addMiddlewareNode(middleware1.address);
 
       await contract.connect(alice).setTrade(
-        mike.address, 
-        alice.address, 
-        mike.address, 
-        ethers.parseEther("1.0"), 
-        ethers.parseEther("2.0"), 
+        mike.address,
+        alice.address,
+        mike.address,
+        ethers.parseEther("1.0"),
+        ethers.parseEther("2.0"),
         1
       );
       const tradeId = await contract.getTradeId(alice.address, mike.address, ethers.parseEther("1.0"), ethers.parseEther("2.0"), 1);
@@ -175,7 +175,7 @@ describe("LISTRACK_ETH Contract", function () {
       await expect(contract.connect(middleware1).settleTrade(tradeId, false))
         .to.emit(contract, "TradeSettled")
         .withArgs(tradeId, false);
-      
+
       const trade = await contract.getTradeStatus(tradeId);
       expect(trade.settled).to.be.true;
     });
@@ -184,11 +184,11 @@ describe("LISTRACK_ETH Contract", function () {
       await contract.addMiddlewareNode(middleware1.address);
 
       await contract.connect(alice).setTrade(
-        mike.address, 
-        alice.address, 
-        mike.address, 
-        ethers.parseEther("1.0"), 
-        ethers.parseEther("2.0"), 
+        mike.address,
+        alice.address,
+        mike.address,
+        ethers.parseEther("1.0"),
+        ethers.parseEther("2.0"),
         1
       );
       const tradeId = await contract.getTradeId(alice.address, mike.address, ethers.parseEther("1.0"), ethers.parseEther("2.0"), 1);
@@ -197,18 +197,18 @@ describe("LISTRACK_ETH Contract", function () {
       await contract.connect(alice).submitTransactionHash(tradeId, "0xabcdef");
 
       await contract.connect(middleware1).settleTrade(tradeId, true);
-      
+
       await expect(contract.connect(middleware1).settleTrade(tradeId, true))
         .to.be.revertedWith("Trade already settled");
     });
 
     it("Should prevent unauthorized nodes from settling trades", async function () {
       await contract.connect(alice).setTrade(
-        mike.address, 
-        alice.address, 
-        mike.address, 
-        ethers.parseEther("1.0"), 
-        ethers.parseEther("2.0"), 
+        mike.address,
+        alice.address,
+        mike.address,
+        ethers.parseEther("1.0"),
+        ethers.parseEther("2.0"),
         1
       );
       const tradeId = await contract.getTradeId(alice.address, mike.address, ethers.parseEther("1.0"), ethers.parseEther("2.0"), 1);

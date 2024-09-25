@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from data_connectors.utils import do_something
 
 
