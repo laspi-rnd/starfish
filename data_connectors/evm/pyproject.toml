@@ -1,0 +1,26 @@
+[project]
+name = "app"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "celery[redis]>=5.4.0",
+    "fastapi>=0.112.1",
+    "loguru>=0.7.2",
+    "pydantic>=2.8.2",
+    "pydantic-settings>=2.5.2",
+    "redis>=5.0.8",
+    "uvicorn>=0.30.6",
+    "web3>=7.3.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.taskipy.tasks]
+serve = "uvicorn app.main:app --reload --port 8080"
+
+[tool.uv]
+dev-dependencies = ["taskipy>=1.13.0", "ruff>=0.6.7"]

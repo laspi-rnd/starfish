@@ -1,0 +1,52 @@
+services:
+  redis:
+    image: redis:7
+    container_name: starfish-evm-connector-redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  celery:
+    build: .
+    image: starfish-evm-connector-celery:latest
+    container_name: starfish-evm-connector-celery
+    environment:
+      BLOCK_CONFIRMATIONS: "50"
+      CELERY_BROKER_URL: "redis://redis:6379/0"
+      ETH_NODE_URL: "https://ethereum-rpc.publicnode.com"
+      REDIS_URL: "redis://redis:6379/0"
+    command:
+      [
+        "uv",
+        "run",
+        "celery",
+        "-A",
+        "app.tasks:celery",
+        "worker",
+        "--loglevel=info",
+      ]
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  api:
+    build: .
+    image: starfish-evm-connector-api:latest
+    container_name: starfish-evm-connector-api
+    ports:
+      - "8080:80"
+    environment:
+      BLOCK_CONFIRMATIONS: "50"
+      CELERY_BROKER_URL: "redis://redis:6379/0"
+      ETH_NODE_URL: "https://ethereum-rpc.publicnode.com"
+      REDIS_URL: "redis://redis:6379/0"
+    depends_on:
+      redis:
+        condition: service_healthy
+      celery:
+        condition: service_started
+    restart: unless-stopped
