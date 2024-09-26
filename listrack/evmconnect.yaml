@@ -1,0 +1,4 @@
+policyengine.simple:
+  fixedGasPrice: null
+  gasOracle:
+    mode: connector

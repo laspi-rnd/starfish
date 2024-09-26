@@ -1,0 +1,57 @@
+stages:
+- build
+- setup
+- test
+- cleanup
+
+build_data_connector_evm:
+  stage: build
+  script:
+    - cd data_connectors/evm
+    - docker build -t starfish/data_connector_evm .
+
+setup:
+  stage: setup
+  script:
+    # Get IP and a random available port
+    - export TEMP_NETWORK_IP=$(curl -s ifconfig.me)
+    - export TEMP_NETWORK_PORT=44950
+
+    # Start HardHat node in the background
+    - cd listrack/
+    - npm install
+    - npx hardhat node --network hardhat --hostname 0.0.0.0 --port $TEMP_NETWORK_PORT &
+    - echo "Started HardHat node on port $TEMP_NETWORK_PORT"
+
+    # Generate a Hyperledger FireFly stack
+    - ff init hardhat 4 -p 8000 -v -n remote-rpc --chain-id 31337 --remote-node-url http://$TEMP_NETWORK_IP:$TEMP_NETWORK_PORT --remote-node-deploy --connector-config evmconnect.yaml
+    - echo "Generated FireFly stack"
+
+    # Transfer ETH to the FireFly wallets
+    - npx hardhat transfer-eth-to-members --network localhost
+    - echo "Transfered ETH to FireFly wallets"
+
+    # Spin up the FireFly stack
+    - ff start hardhat
+    - echo "Started FireFly stack"
+
+test:
+  stage: test
+  script:
+    - echo "Running tests..."
+
+cleanup:
+  stage: cleanup
+  script:
+    # Tear down the FireFly stack
+    - ff stop hardhat
+    - ff remove hardhat -f
+    - echo "Stopped and removed FireFly stack"
+
+    # Shut down the HardHat node
+    - kill $(jobs -p)
+    - echo "Stopped HardHat node"
+
+    # Cleanup built Docker images
+    - docker rmi starfish/data_connector_evm
+    - echo "Removed Docker image"
