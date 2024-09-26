@@ -25,3 +25,16 @@ def build_firefly_url(
     else:
         raise ValueError(f"Unsupported URL type: {url_type}")
     return f"{url}{path}"
+
+
+def to_kebab_case(text: str) -> str:
+    """
+    Convert a string to kebab-case.
+
+    Args:
+        text (str): The text to convert.
+
+    Returns:
+        str: The converted text.
+    """
+    return text.replace(" ", "-").replace("_", "-").lower()
