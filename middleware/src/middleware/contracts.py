@@ -155,6 +155,41 @@ async def deploy_contract(
     )
 
 
+async def get_contract(
+    api_name: str | FireFlySmartContract,
+    *,
+    namespace: str = "default",
+) -> FireFlySmartContract | None:
+    """
+    Gets the information of a smart contract from the blockchain.
+    Ref: https://hyperledger.github.io/firefly/latest/tutorials/custom_contracts/ethereum/
+
+    Args:
+        api_name (str | FireFlySmartContract): The name of the HTTP API to get the contract information.
+        namespace (str): The namespace to deploy the contract to.
+
+    Returns:
+        FireFlySmartContract | None: The FireFly smart contract object, containing all information about
+            the deployed smart contract, or None if the contract does not exist.
+    """
+    if isinstance(api_name, FireFlySmartContract):
+        api_name = api_name.api_name
+
+    url = build_firefly_url(path=f"/api/v1/namespaces/{namespace}/apis/{api_name}")
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            if response.status == 404:
+                return None
+            response.raise_for_status()
+            response_data = await response.json()
+
+    return FireFlySmartContract(
+        blockchain_address=response_data["location"]["address"],
+        interface_id=response_data["interface"]["id"],
+        api_name=api_name,
+    )
+
+
 async def call(
     *,
     api_name: str | FireFlySmartContract,
@@ -313,16 +348,31 @@ async def listen_events(
             "firstEvent": "newest",
         },
         "topic": app_identifier,
+        "name": app_identifier,
     }
+    listener_id = None
     async with aiohttp.ClientSession() as session:
         async with session.post(
             url,
             data=json.dumps(json_data),
             headers={"accept": "application/json", "content-type": "application/json"},
         ) as response:
-            response.raise_for_status()
-            response_data = await response.json()
-            listener_id = response_data["id"]
+            if response.status == 409:
+                # If the listener already exists, we need to get its ID
+                url = build_firefly_url(
+                    path=f"/api/v1/namespaces/{namespace}/contracts/listeners/{app_identifier}"
+                )
+                async with session.get(url) as response:
+                    response.raise_for_status()
+                    response_data = await response.json()
+                    listener_id = response_data["id"]
+            elif response.status >= 200 and response.status < 300:
+                response_data = await response.json()
+                listener_id = response_data["id"]
+            else:
+                response.raise_for_status()
+    if not listener_id:
+        raise ValueError("Failed to create event listener")
 
     logger.debug(
         f"Successfully created event listener for event {event_name} with id {listener_id}"
