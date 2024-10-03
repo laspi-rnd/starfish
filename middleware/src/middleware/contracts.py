@@ -174,7 +174,7 @@ async def call(
         raise ValueError(f"Unsupported API method: {api_method}")
 
     url = build_firefly_url(
-        path=f"/api/v1/namespaces/{namespace}/apis/{api_name}/invoke/{method}?confirm=true"
+        path=f"/api/v1/namespaces/{namespace}/apis/{api_name}/{api_method}/{method}?confirm=true"
     )
     json_data = {
         "input": parameters,
