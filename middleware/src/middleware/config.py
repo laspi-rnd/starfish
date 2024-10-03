@@ -22,6 +22,7 @@ class Settings(BaseSettings):
         description="Listrack function settle trade", default="settleTrade"
     )
     namespace: Optional[str] = Field(description="Namespace", default="default")
+    redis_url: str = Field(description="URL of the Redis server")
     state_ttl: int = Field(description="State time to live in seconds")
 
 
