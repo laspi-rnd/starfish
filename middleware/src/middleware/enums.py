@@ -19,3 +19,8 @@ class FireFlyUrlTypeEnum(str, Enum):
 class MessageType(str, Enum):
     BROADCAST = "broadcast"
     PRIVATE = "private"
+
+
+class StarfishMessageType(str, Enum):
+    ASK_FOR_ETHEREUM_ADDRESS = "ask_for_ethereum_address"
+    ETHEREUM_ADDRESS = "ethereum_address"

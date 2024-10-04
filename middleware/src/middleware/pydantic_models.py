@@ -22,3 +22,11 @@ class Message(BaseModel):
     from_org: str
     data: JSONSerializable
     type: MessageType
+
+
+class StarfishMessageAskForEthereumAddress(BaseModel):
+    pass
+
+
+class StarfishMessageEthereumAddress(BaseModel):
+    address: str

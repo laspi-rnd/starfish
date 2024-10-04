@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import aiohttp
+
 from middleware.config import settings
 from middleware.enums import FireFlyUrlTypeEnum, MessageType
 from middleware.pydantic_models import Message
@@ -27,6 +29,25 @@ def build_firefly_url(
     else:
         raise ValueError(f"Unsupported URL type: {url_type}")
     return f"{url}{path}"
+
+
+async def get_my_ethereum_address() -> str:
+    """
+    Get the Ethereum address of the current organization.
+
+    Returns:
+        str: The Ethereum address.
+    """
+    uri = build_firefly_url("/api/v1/status")
+    async with aiohttp.ClientSession() as session:
+        async with session.get(uri) as response:
+            response.raise_for_status()
+            response_data = await response.json()
+            verifiers = response_data["org"]["verifiers"]
+            for verifier in verifiers:
+                if verifier["type"] == "ethereum_address":
+                    return verifier["value"]
+            raise ValueError("Ethereum address not found")
 
 
 def parse_message(raw_message: JSONSerializable) -> Message:
