@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from typing import Union, List, Dict
+from typing import Union, List
 
-JSONSerializable = Union[
-    None, bool, int, float, str, List["JSONSerializable"], Dict[str, "JSONSerializable"]
-]
+JSONSerializable = Union[None, bool, int, float, str, List[dict], dict]

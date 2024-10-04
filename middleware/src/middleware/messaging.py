@@ -161,6 +161,63 @@ async def listen_messages(
     )
 
 
+async def send_private_message(
+    data: JSONSerializable,
+    to_org: str,
+    *,
+    namespace: str = "default",
+    tag: str = None,
+    topics: List[str] = None,
+) -> JSONSerializable:
+    """
+    Send a private message to a specific organization via the FireFly API.
+
+    Args:
+        data (JSONSerializable): The data to send.
+        to_org (str): The organization to send the message to.
+        namespace (str): The namespace to send the message from.
+        tag (str): An optional tag to include in the message.
+        topics (List[str]): An optional list of topics to include in the message.
+
+    Returns:
+        JSONSerializable: The response from the FireFly API.
+    """
+    url = build_firefly_url(path=f"/api/v1/namespaces/{namespace}/messages/private")
+    json_data = {
+        "data": [
+            {
+                "value": data,
+                "validator": "json",
+            }
+        ],
+        "group": {
+            "members": [
+                {
+                    "identity": to_org,
+                }
+            ]
+        },
+    }
+    if tag:
+        if "header" not in json_data:
+            json_data["header"] = {}
+        json_data["header"]["tag"] = tag
+    if topics:
+        if "header" not in json_data:
+            json_data["header"] = {}
+        json_data["header"]["topics"] = topics
+    logger.debug(f"Sending private message to {to_org}: {json_data}")
+    async with aiohttp.ClientSession() as session:
+        async with session.post(
+            url,
+            data=json.dumps(json_data),
+            headers={"accept": "application/json", "content-type": "application/json"},
+        ) as response:
+            response.raise_for_status()
+            response_data = await response.json()
+            return response_data
+
+
 async def subscribe_to_websocket(
     uri: str,
     on_message: Callable[[JSONSerializable], Awaitable[None]],

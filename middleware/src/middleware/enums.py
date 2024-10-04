@@ -14,3 +14,8 @@ class CheckTransactionStateEnum(int, Enum):
 class FireFlyUrlTypeEnum(str, Enum):
     REST = "rest"
     WS = "ws"
+
+
+class MessageType(str, Enum):
+    BROADCAST = "broadcast"
+    PRIVATE = "private"

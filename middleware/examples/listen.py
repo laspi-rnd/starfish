@@ -3,10 +3,11 @@ import asyncio
 
 from middleware.messaging import listen_messages
 from middleware.types import JSONSerializable
+from middleware.utils import parse_message
 
 
 async def on_message(message: JSONSerializable) -> None:
-    print(f"Received message: {message}")
+    print(f"Received message: {parse_message(message)}")
 
 
 async def main() -> None:

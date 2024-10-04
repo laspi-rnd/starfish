@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from middleware.config import settings
-from middleware.enums import FireFlyUrlTypeEnum
+from middleware.enums import FireFlyUrlTypeEnum, MessageType
+from middleware.pydantic_models import Message
+from middleware.types import JSONSerializable
 
 
 def build_firefly_url(
@@ -25,6 +27,32 @@ def build_firefly_url(
     else:
         raise ValueError(f"Unsupported URL type: {url_type}")
     return f"{url}{path}"
+
+
+def parse_message(raw_message: JSONSerializable) -> Message:
+    """
+    Parses a message from a raw message.
+    """
+    org = parse_org(raw_message["header"]["author"])
+    data = raw_message["data"][0]["value"]
+    type = MessageType(raw_message["header"]["type"])
+    return Message(from_org=org, data=data, type=type)
+
+
+def parse_org(author: str) -> str:
+    """
+    Parses an organization based on the author of the message.
+
+    Args:
+        author (str): The author of the message.
+
+    Returns:
+        str: The parsed organization.
+    """
+    prefix = "did:firefly:org/"
+    if prefix not in author:
+        raise ValueError("Author is not a valid FireFly DID")
+    return author.replace(prefix, "")
 
 
 def to_kebab_case(text: str) -> str:
