@@ -59,6 +59,7 @@ class StateManager:
         pass
 
     async def handle_message(self, message: Message) -> None:
+        # TODO: Add logs here
         # Parse message content
         content = self._parse_message_content(message)
 
