@@ -107,6 +107,10 @@ async def main():
             namespace=settings.namespace,
         )
 
+    # TODO: If I'm the owner, I'll stop here until the middleware nodes that are mentioned in the
+    # whitelist match the ones in the network. This consists on adding missing nodes and removing
+    # nodes that are not in the network anymore.s
+
     # Start listening to LISTRACK's "CheckTransaction" events
     listen_listrack_task = await listen_events(
         contract=listrack_contract,
