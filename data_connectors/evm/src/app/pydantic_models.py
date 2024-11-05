@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 from pydantic import BaseModel
-from typing import Optional
-
-from app.enums import JobStatus
 
 
-class JobVerifyTransactionResult(BaseModel):
-    job_id: str
-    status: JobStatus
-    result: Optional[bool]
+class TransactionResultIn(BaseModel):
+    transaction_hash: str
+    result: bool
 
 
 class VerifyTransactionIn(BaseModel):

@@ -9,14 +9,62 @@ services:
       retries: 3
     restart: unless-stopped
 
-  celery:
+  example-callback:
     build: .
-    image: starfish-evm-connector-celery:latest
-    container_name: starfish-evm-connector-celery
+    image: starfish-evm-connector-example-callback:latest
+    container_name: starfish-evm-connector-example-callback
     environment:
-      BLOCK_CONFIRMATIONS: "50"
       CELERY_BROKER_URL: "redis://redis:6379/0"
       ETH_NODE_URL: "https://ethereum-rpc.publicnode.com"
+      MIDDLEWARE_BASE_URL: "http://example-callback:8080"
+      REDIS_URL: "redis://redis:6379/0"
+    command:
+      [
+        "uv",
+        "run",
+        "uvicorn",
+        "examples.callback_api:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8080",
+      ]
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+
+  celery-beat:
+    build: .
+    image: starfish-evm-connector-celery:latest
+    container_name: starfish-evm-connector-celery-beat
+    environment:
+      CELERY_BROKER_URL: "redis://redis:6379/0"
+      ETH_NODE_URL: "https://ethereum-rpc.publicnode.com"
+      MIDDLEWARE_BASE_URL: "http://example-callback:8080"
+      REDIS_URL: "redis://redis:6379/0"
+    command:
+      [
+        "uv",
+        "run",
+        "celery",
+        "-A",
+        "app.tasks:celery",
+        "beat",
+        "--loglevel=info",
+      ]
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  celery-worker:
+    build: .
+    image: starfish-evm-connector-celery:latest
+    container_name: starfish-evm-connector-celery-worker
+    environment:
+      CELERY_BROKER_URL: "redis://redis:6379/0"
+      ETH_NODE_URL: "https://ethereum-rpc.publicnode.com"
+      MIDDLEWARE_BASE_URL: "http://example-callback:8080"
       REDIS_URL: "redis://redis:6379/0"
     command:
       [
@@ -31,6 +79,8 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      example-callback:
+        condition: service_started
     restart: unless-stopped
 
   api:
@@ -40,13 +90,15 @@ services:
     ports:
       - "8080:80"
     environment:
-      BLOCK_CONFIRMATIONS: "50"
       CELERY_BROKER_URL: "redis://redis:6379/0"
       ETH_NODE_URL: "https://ethereum-rpc.publicnode.com"
+      MIDDLEWARE_BASE_URL: "http://example-callback:8080"
       REDIS_URL: "redis://redis:6379/0"
     depends_on:
       redis:
         condition: service_healthy
-      celery:
+      celery-beat:
+        condition: service_started
+      celery-worker:
         condition: service_started
     restart: unless-stopped
