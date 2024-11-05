@@ -4,6 +4,7 @@ from typing import List
 from loguru import logger
 from redis import Redis as SyncRedis
 from redis.asyncio import Redis as AsyncRedis
+from redis.lock import Lock
 
 from app.config import settings
 
@@ -12,7 +13,7 @@ class JobManager:
     def __init__(self):
         self._async_redis = AsyncRedis.from_url(settings.redis_url)
         self._sync_redis = SyncRedis.from_url(settings.redis_url)
-        self._validate_transactions_lock = self._sync_redis.lock(
+        self._validate_transactions_lock: Lock = self._sync_redis.lock(
             "validate_transactions_lock", timeout=settings.validate_transactions_timeout
         )
 

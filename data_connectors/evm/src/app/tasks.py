@@ -83,6 +83,9 @@ def verify_block_data(self: Task):
     pending from our cache.
     """
     # TODO: Review if we should refactor this as an async task as it is mostly I/O bound
+    if job_manager.validate_transactions_lock.locked():
+        logger.warning("Transaction validation is already in progress. Skipping...")
+        return
     with job_manager.validate_transactions_lock:
         # Get latest finalized block receipts
         latest_finalized_block_receipts = w3.eth.get_block_receipts("finalized")
@@ -155,11 +158,11 @@ def verify_block_data(self: Task):
                         job_manager.set_transaction_result(
                             tx_hash, tx_receipt["status"] == 1
                         )
-
-                    # Transaction found in block, we set the result
-                    job_manager.set_transaction_result(
-                        tx_hash, block_receipts_hashes[tx_hash] == 1
-                    )
+                    else:
+                        # Transaction found in block, we set the result
+                        job_manager.set_transaction_result(
+                            tx_hash, block_receipts_hashes[tx_hash] == 1
+                        )
 
                     # Remove transaction from the block's set
                     job_manager.remove_transaction(tx_hash, block_number)

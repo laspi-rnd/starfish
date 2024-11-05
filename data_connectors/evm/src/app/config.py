@@ -11,7 +11,8 @@ class Settings(BaseSettings):
     middleware_base_url: str = Field(description="Base URL of the middleware")
     redis_url: str = Field(description="URL of the Redis server")
     validate_transactions_timeout: int = Field(
-        description="Timeout in seconds for the transaction validation lock", default=10
+        description="Timeout in seconds for the transaction validation lock",
+        default=3600,
     )
     verify_block_data_interval: int = Field(
         description="Interval in seconds to verify block data", default=12
