@@ -6,12 +6,15 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "aiohttp>=3.10.5",
+    "fastapi>=0.115.6",
     "loguru>=0.7.2",
+    "ntplib>=0.4.0",
     "orjson>=3.10.7",
     "pydantic>=2.8.2",
     "pydantic-settings>=2.4.0",
     "websockets>=13.1",
     "redis>=5.1.0",
+    "uvicorn>=0.34.0",
 ]
 
 [tool.black]
@@ -33,6 +36,9 @@ dev-dependencies = [
     "taskipy>=1.13.0",
     "isort>=5.13.2",
     "ruff>=0.6.7",
+    "matplotlib>=3.9.2",
+    "networkx>=3.4.1",
+    "requests>=2.32.3",
 ]
 
 [tool.uv.sources]

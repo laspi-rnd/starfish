@@ -128,6 +128,10 @@ async def main():
     )
     logger.info("Listening to peer's messages...")
 
+    # Start looping into task states
+    handle_states_task = asyncio.create_task(state_manager.handle_states_loop())
+    logger.info("State manager started...")
+
     # Loop in order to keep the Core running
     while True:
         try:
@@ -141,6 +145,9 @@ async def main():
 
     # Stop listening to other peer's messages
     listen_messages_task.cancel()
+
+    # Stop the state manager
+    handle_states_task.cancel()
 
     logger.info("Core stopped. Goodbye!")
 

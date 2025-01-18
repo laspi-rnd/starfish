@@ -2,15 +2,6 @@
 from enum import Enum
 
 
-class CheckTransactionStateEnum(int, Enum):
-    LEADER_ELECTION = 1
-    CHECKING_TRANSACTION = 2
-    VOTING = 3
-    COMMITTING = 4
-    FINISHED_SUCCESS = 5
-    FINISHED_FAILED = 6
-
-
 class FireFlyUrlTypeEnum(str, Enum):
     REST = "rest"
     WS = "ws"
@@ -24,3 +15,5 @@ class MessageType(str, Enum):
 class StarfishMessageType(str, Enum):
     ASK_FOR_ETHEREUM_ADDRESS = "ask_for_ethereum_address"
     ETHEREUM_ADDRESS = "ethereum_address"
+    PEER_SENT_OWN_VOTE = "peer_sent_own_vote"
+    PEER_SENT_COMPUTED_RESULT = "peer_sent_computed_result"

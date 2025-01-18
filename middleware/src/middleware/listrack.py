@@ -41,3 +41,43 @@ async def get_contract_owner(*, namespace: str = "default") -> str:
             namespace=namespace,
         )
     )["output"]
+
+
+async def get_trade_id_by_transaction_hash(
+    transaction_hash: str, *, namespace: str = "default"
+) -> str:
+    """
+    Returns the trade ID by transaction hash
+
+    Args:
+        transaction_hash (str): The transaction hash
+        namespace (str, optional): The namespace of the contract. Defaults to "default".
+
+    Returns:
+        str: The trade ID
+    """
+    return (
+        await query(
+            api_name=settings.listrack_contract_api_name,
+            method="getTradeIdByTransactionHash",
+            namespace=namespace,
+            parameters={"_ethTransactionHash": transaction_hash},
+        )
+    )["output"]
+
+
+async def settle_trade(
+    trade_id: str, confirmed: bool, *, namespace: str = "default"
+) -> None:
+    """
+    Settles a trade
+    """
+    await invoke(
+        api_name=settings.listrack_contract_api_name,
+        method="settleTrade",
+        namespace=namespace,
+        parameters={
+            "tradeId": trade_id,
+            "confirmed": confirmed,
+        },
+    )

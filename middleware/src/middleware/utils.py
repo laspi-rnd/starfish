@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import aiohttp
+import ntplib
 
 from middleware.config import settings
 from middleware.enums import FireFlyUrlTypeEnum, MessageType
@@ -48,6 +49,53 @@ async def get_my_ethereum_address() -> str:
                 if verifier["type"] == "ethereum_address":
                     return verifier["value"]
             raise ValueError("Ethereum address not found")
+
+
+async def get_my_org() -> str:
+    """
+    Get the current organization.
+
+    Returns:
+        str: The current organization.
+    """
+    uri = build_firefly_url("/api/v1/status")
+    async with aiohttp.ClientSession() as session:
+        async with session.get(uri) as response:
+            response.raise_for_status()
+            response_data = await response.json()
+            return response_data["org"]["name"]
+
+
+async def get_nodes_count(*, namespace: str = "default") -> int:
+    """
+    Get the number of nodes in the network.
+
+    Args:
+        namespace (str): The namespace to check.
+
+    Returns:
+        int: The number of nodes.
+    """
+    uri = build_firefly_url(
+        f"/api/v1/namespaces/{namespace}/network/nodes?limit=1&count=true"
+    )
+    async with aiohttp.ClientSession() as session:
+        async with session.get(uri) as response:
+            response.raise_for_status()
+            response_data = await response.json()
+            return response_data["total"]
+
+
+def get_ntp_timestamp() -> int:
+    """
+    Get the current NTP timestamp.
+
+    Returns:
+        int: The current NTP timestamp.
+    """
+    ntp_client = ntplib.NTPClient()
+    response = ntp_client.request(settings.ntp_server)
+    return int(response.tx_time)
 
 
 def parse_message(raw_message: JSONSerializable) -> Message:
