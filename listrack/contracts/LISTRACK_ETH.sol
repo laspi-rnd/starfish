@@ -31,6 +31,9 @@ contract LISTRACK_ETH {
     // Mapping to track the trades
     mapping(bytes32 => Trade) public trades;
 
+    // Mapping to keep track of which transaction hash is associated with which trade
+    mapping(string => bytes32) public tradeIdByTransactionHash;
+
     // Mapping to keep track of used alien transaction hashes
     mapping(bytes32 => bool) public usedAlienTx;
 
@@ -119,6 +122,12 @@ contract LISTRACK_ETH {
             );
     }
 
+    function getTradeIdByTransactionHash(
+        string memory _ethTransactionHash
+    ) public view returns (bytes32) {
+        return tradeIdByTransactionHash[_ethTransactionHash];
+    }
+
     // Function for Mike to agree on Alice's terms and lock his DREX
     function agreeTrade(bytes32 tradeId) public payable {
         Trade storage trade = trades[tradeId];
@@ -148,6 +157,7 @@ contract LISTRACK_ETH {
         bytes32 txHash = keccak256(abi.encodePacked(_ethTransactionHash));
         require(!usedAlienTx[txHash], "Transaction hash already used");
         usedAlienTx[txHash] = true;
+        tradeIdByTransactionHash[_ethTransactionHash] = tradeId;
 
         emit CheckTransaction(
             trade.aliceEthAddress,
