@@ -195,6 +195,7 @@ class StateManager:
             tx_state.coordinator_weights[message.from_org] = content.coordinator_weight
             tx_state.peer_votes[message.from_org] = content.vote
             await self.set_state(content.tx_hash, tx_state)
+            return
 
         # If a peer has sent the computed result for the transaction, we must ensure that we
         # have the same understanding about who the coordinator is. If we do, we'll only store the
@@ -229,10 +230,12 @@ class StateManager:
             coordinator = content.coordinator
             my_coordinator = tx_state.coordinator
 
-            # If we don't have a coordinator yet, that's an error
+            # If we don't have a coordinator yet, we must simply store the result
             if not my_coordinator:
-                logger.error(
-                    f"No coordinator elected for transaction {content.tx_hash}"
+                tx_state.results[message.from_org] = result
+                await self.set_state(content.tx_hash, tx_state)
+                logger.info(
+                    f"Peer {message.from_org} has computed the result: {result}"
                 )
                 return
 
@@ -258,7 +261,10 @@ class StateManager:
             # If we agree on the coordinator and I'm the coordinator, store the result
             tx_state.results[my_org] = tx_state.result
             tx_state.results[message.from_org] = result
+            await self.set_state(content.tx_hash, tx_state)
             logger.info(f"Peer {message.from_org} has computed the result: {result}")
+
+            return
 
         raise ValueError(f"Unsupported message type: {message.data.get('type')}")
 
@@ -275,7 +281,7 @@ class StateManager:
             tx_state = await self.get_state(transaction_hash)
             # TODO (future): add some sort of mechanism to handle concurrency on tx state
             logger.info(
-                f"Handling state for transaction {transaction_hash}: {tx_state}"
+                f"I'm {me}. Handling state for transaction {transaction_hash}: {tx_state}"
             )
 
             # No state? Skip it
@@ -330,6 +336,8 @@ class StateManager:
                 logger.info("All results received, sending back to the blockchain")
                 trade_id = await get_trade_id_by_transaction_hash(transaction_hash)
                 await settle_trade(trade_id, tx_state.result)
+                await self._redis.delete(key)
+                # TODO: cleanup mechanism for peers that are not the coordinator
 
     async def handle_states_loop(self) -> None:
         while True:

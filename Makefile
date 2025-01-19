@@ -21,7 +21,7 @@ start-network:
 start-firefly:
 	@echo "Generating FireFly stack..."
 	cd listrack && \
-	ff init hardhat 4 -p 8000 -v -n remote-rpc --chain-id 31337 --remote-node-url http://$(TEMP_NETWORK_IP):$(TEMP_NETWORK_PORT) --remote-node-deploy --connector-config evmconnect.yaml
+	ff init hardhat 3 -p 8000 -v -n remote-rpc --chain-id 31337 --remote-node-url http://$(TEMP_NETWORK_IP):$(TEMP_NETWORK_PORT) --remote-node-deploy --connector-config evmconnect.yaml
 	@echo "Transferring ETH to FireFly wallets..."
 	cd listrack && \
 	npx hardhat transfer-eth-to-members --network localhost
